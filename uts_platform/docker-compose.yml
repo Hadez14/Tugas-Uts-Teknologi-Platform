@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  # Service Web Aplikasi Buku Tamu
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bukutamu-web
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      - DB_HOST=database
+      - DB_USER=root
+      - DB_PASS=rahasia123
+      - DB_NAME=bukutamu_db
+    volumes:
+      - ./logs:/var/www/logs
+    depends_on:
+      - database
+    networks:
+      - bukutamu-net
+
+  # Service Database MySQL 8.0
+  database:
+    image: mysql:8.0
+    container_name: bukutamu-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rahasia123
+      MYSQL_DATABASE: bukutamu_db
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - bukutamu-net
+
+# Named volume untuk menjamin persistensi data buku tamu
+volumes:
+  db_data:
+    driver: local
+
+# Custom network bridge agar service web dan database dapat berkomunikasi via nama service
+networks:
+  bukutamu-net:
+    driver: bridge
